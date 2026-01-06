@@ -1,0 +1,138 @@
+<% layout("/layouts/boilerplate") %>
+
+<script>
+    const apiKey = "<%= process.env.API_KEY %>";
+    const listing = <%- JSON.stringify(listing) %>;
+</script>
+
+<div class="container mt-5 mb-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="fw-bold mb-1"><%= listing.title %></h1>
+            <div class="d-flex align-items-center gap-3">
+        </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-5">
+        <div class="col-12">
+            <div class="ratio ratio-21x9">
+                <img src="<%= listing.image.url %>" class="rounded-4 object-fit-cover shadow-sm" alt="Listing image">
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-5">
+        
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center pb-4 border-bottom">
+                <div>
+                    <h3 class="fw-bold">Stay hosted by <%= listing.owner.username %></h3>
+                </div>
+                <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 56px; height: 56px; font-size: 1.2rem;">
+                    <%= listing.owner.username.charAt(0).toUpperCase() %>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-2">
+                <h5 class="fw-bold mb-3">About this property</h5>
+                <p class="text-secondary lh-lg fs-5"><%= listing.description %></p>
+            </div>
+
+            <% if(currUser && listing.owner._id.equals(currUser._id)) { %>
+            <div class="d-flex gap-2 mt-4">
+                <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark px-4 py-2 fw-semibold">Edit Listing</a>
+                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+                    <button class="btn btn-outline-danger px-4 py-2 fw-semibold">Delete</button>
+                </form>
+            </div>
+            <% } %>
+
+            <hr class="my-5">
+
+            <div class="reviews-container">
+                <h4 class="fw-bold mb-4">
+                    <i class="fa-solid fa-comment-dots me-2"></i>What guests said
+                </h4>
+                
+                <% if(listing.reviews.length > 0) { %>
+                <div class="row g-4">
+                    <% for(review of listing.reviews) { %>
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 bg-light p-3 rounded-4 shadow-none">
+                            <div class="card-body p-2">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-secondary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                        <%= review.author.username.charAt(0).toUpperCase() %>
+                                    </div>
+                                    <h6 class="fw-bold mb-0">@<%= review.author.username %></h6>
+                                </div>
+                                <p class="starability-result scale-75 origin-left mb-2" data-rating="<%= review.rating %>"></p>
+                                <p class="text-muted small lh-base"><%= review.comment %></p>
+                                
+                                <% if(currUser && review.author._id.equals(currUser._id)) { %>
+                                <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                                    <button class="btn btn-sm text-danger p-0 mt-2 small text-decoration-none">Remove</button>
+                                </form>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+                <% } else { %>
+                <p class="text-muted fst-italic">No reviews yet for this listing.</p>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="position-sticky" style="top: 6rem; z-index: 10;">
+                
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-baseline mb-4">
+                            <h2 class="fw-bold mb-0">&#8377; <%= listing.price.toLocaleString("en-IN") %></h2>
+                            <span class="text-muted">/ night</span>
+                        </div>
+
+                        <% if(currUser) { %>
+                        <div class="pt-3 border-top mt-3">
+                            <h6 class="fw-bold mb-3">Leave a review</h6>
+                            <form method="POST" action="/listings/<%= listing._id %>/reviews" novalidate class="needs-validation">
+                                <fieldset class="starability-slot mb-3">
+                                    <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+                                    <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                                    <label for="first-rate1">1 star</label>
+                                    <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                                    <label for="first-rate2">2 stars</label>
+                                    <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                                    <label for="first-rate3">3 stars</label>
+                                    <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                                    <label for="first-rate4">4 stars</label>
+                                    <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                                    <label for="first-rate5">5 stars</label>
+                                </fieldset>
+                                
+                                <textarea name="review[comment]" class="form-control rounded-3 mb-3 border-light-subtle bg-light" rows="3" required placeholder="Tell us about your stay..."></textarea>
+                                
+                                <button class="btn btn-danger w-100 py-2 fw-bold rounded-3">Submit Review</button>
+                            </form>
+                        </div>
+                        <% } else { %>
+                            <p class="text-center small text-muted border-top pt-3">Login to write a review</p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h5 class="fw-bold mb-3">Location</h5>
+                    <div id="map" class="rounded-4 shadow-sm border" style="height: 300px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="/js/map.js"></script>
